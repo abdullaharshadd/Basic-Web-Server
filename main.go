@@ -18,7 +18,7 @@ func main() {
 	}
 	addr := ":" + port
 
-	srv, err := internal.NewServer(addr)
+	srv, err := internal.NewServer(".")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -27,12 +27,7 @@ func main() {
 
 	fmt.Printf("starting server on %s\n", addr)
 
-	go func() {
-		<-ctx.Done()
-		srv.Shutdown(context.Background())
-	}()
-
-	if err := srv.ListenAndServe(); err != nil && err != context.Canceled {
+	if err := srv.ListenAndServe(ctx, addr); err != nil && err != context.Canceled {
 		log.Fatal(err)
 	}
 }
