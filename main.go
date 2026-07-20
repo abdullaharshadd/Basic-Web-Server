@@ -26,8 +26,13 @@ func main() {
 	defer cancel()
 
 	fmt.Printf("starting server on %s\n", addr)
+
+	go func() {
+		<-ctx.Done()
+		srv.Shutdown(context.Background())
+	}()
+
 	if err := srv.ListenAndServe(); err != nil && err != context.Canceled {
 		log.Fatal(err)
 	}
-	<-ctx.Done()
 }
