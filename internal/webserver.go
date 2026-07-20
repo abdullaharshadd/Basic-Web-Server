@@ -26,14 +26,15 @@ const DefaultPort = 6789
 // terminate the server gracefully. The infinite-listen behaviour is preserved
 // as long as the context is never cancelled.
 func RunWebServer(ctx context.Context, port int) error {
-	srv, err := NewServer(fmt.Sprintf(":%d", port))
+	addr := fmt.Sprintf(":%d", port)
+	srv, err := NewServer(addr)
 	if err != nil {
 		return fmt.Errorf("creating server on port %d: %w", port, err)
 	}
 
 	log.Printf("Listening for connections on port %d...", port)
 
-	if err := srv.ListenAndServe(ctx, port); err != nil {
+	if err := srv.ListenAndServe(ctx, addr); err != nil {
 		return fmt.Errorf("serving on port %d: %w", port, err)
 	}
 	return nil
