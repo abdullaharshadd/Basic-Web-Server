@@ -222,3 +222,9 @@ func buildRouter() http.Handler {
 
 	return r
 }
+
+// BuildRouter is the exported wrapper around buildRouter, allowing external
+// packages (such as cmd/server/main.go) to obtain the fully wired HTTP handler.
+func BuildRouter() http.Handler {
+	return buildRouter()
+}
