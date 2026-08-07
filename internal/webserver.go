@@ -90,28 +90,21 @@ func (w *WebServer) Shutdown(ctx context.Context) error {
 	return w.srv.Shutdown(ctx)
 }
 
+// BuildRouter constructs and returns the chi router that serves the redirect
+// and static-content routes migrated from the original Connection handler.
+// It is the exported entry point used by cmd/server/main.go.
+func BuildRouter() http.Handler {
+	return buildRouter()
+}
+
 // buildRouter constructs the chi router that serves the redirect and
 // static-content routes migrated from the original Connection handler.
 //
-// MIGRATION_NOTE: this wires the redirects declared in connection.go plus a
-// catch-all handler. Adjust the concrete handlers to match the behaviour of
-// the migrated Connection logic (serveConnection / static file serving) as
-// that code stabilises.
+// MIGRATION_NOTE: this wires RegisterRoutes from connection.go, which
+// registers the catch-all GET /* handler (SendResponse) that handles
+// redirects, 404s, and static file serving.
 func buildRouter() http.Handler {
 	r := chi.NewRouter()
-
-	for from, to := range redirects {
-		target := to
-		r.Get(from, func(rw http.ResponseWriter, req *http.Request) {
-			http.Redirect(rw, req, target, http.StatusMovedPermanently)
-		})
-	}
-
-	r.NotFound(func(rw http.ResponseWriter, req *http.Request) {
-		rw.Header().Set("Content-Type", "text/html; charset=utf-8")
-		rw.WriteHeader(http.StatusNotFound)
-		_, _ = rw.Write([]byte(http404Body))
-	})
-
+	RegisterRoutes(r)
 	return r
 }
